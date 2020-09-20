@@ -26,3 +26,15 @@ git push heroku master
 ==> Run nodemon
 //nodemon src/app.js
 //nodemon src/app.js -e js,hbs
+
+==> Other --> to commit git
+git status
+git add .
+git commit -m "Add About Text"
+
+==> Other --> to commit heroku
+git push heroku master
+
+==>Run local server
+npm run start
+
