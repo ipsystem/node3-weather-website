@@ -3,6 +3,7 @@ const express = require('express')
 const hbs = require('hbs')
 const geocode = require('./utils/geocode')
 const forecast = require('./utils/forecast')
+const courseApi = require('./utils/courseApi')
 
 
 // console.log(__dirname)
@@ -38,6 +39,13 @@ app.get('/about', (req, res) => {
     })
 })
 
+app.get('/courses', (req, res) => {
+    res.render('courses', {
+        title: 'Search',
+        name: 'Elbert Leite'
+    })
+})
+
 app.get('/weather', (req, res) => {
 
     if(!req.query.address){
@@ -62,6 +70,20 @@ app.get('/weather', (req, res) => {
                 address: req.query.address
             })
         })
+    })
+    
+  
+})
+
+app.get('/searchCourses', (req, res) => {
+
+    courseApi(undefined, (error, response) => {
+        if(error){
+            return res.send({error: error})
+        }
+        console.log(response)
+        res.send(response)
+       
     })
     
   

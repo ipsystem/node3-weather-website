@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <title>Index</title>
+    <link rel="icon" href="/img/weather.png" >
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@5.x/css/materialdesignicons.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Material+Icons">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vuetify@2.3.10/dist/vuetify.min.css">
+    <link rel="stylesheet" href="/css/styles.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/babel-polyfill/dist/polyfill.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vuetify@2.3.10/dist/vuetify.min.js"></script>
+    
+</head>
+
+<body>
+    <div class="main-content">
+
+        {{>header}}
+        <p>Search Courses</p>
+
+        <form>
+            <button>Search</button>
+        </form>
+
+        <div id="app">
+            <v-app id="inspire">
+                <v-col
+                    v-for="card in cards"
+                    :key="card.title"
+                    :cols="card.flex"
+                >
+                <v-card
+                class="mx-auto"
+                max-width="800"
+                >
+                <v-img
+                    class="white--text align-end"
+                    width="200px"
+                    height="auto"
+                    :src="card.src"
+                >
+                    {{!-- <v-card-title v-text="card.title"></v-card-title> --}}
+                </v-img>
+            
+                <v-card-subtitle class="pb-0">Number 10</v-card-subtitle>
+            
+                <v-card-text class="text--primary">
+                    <div>Whitehaven Beach</div>
+            
+                    <div v-text="card.title"></div>
+                </v-card-text>
+            
+                <v-card-actions>
+                    <v-btn
+                    color="orange"
+                    text
+                    >
+                    Share
+                    </v-btn>
+            
+                    <v-btn
+                    color="orange"
+                    text
+                    >
+                    Explore
+                    </v-btn>
+                </v-card-actions>
+                </v-card>
+            </v-app>
+            </div>
+        <p id="courses"></p>
+        
+    </div>
+
+    {{>footer}}
+</body>
+
+<script src="/js/courses.js"></script>
+
+</html>

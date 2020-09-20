@@ -11,10 +11,13 @@ cat ~/.ssh/id_rsa.pub
 ==>Test ssh connection - and connect
 ssh -T git@github.com
 
+git remote add origin https://github.com/ipsystem/node3-weather-website.git
+
+git push -u origin master
 
 ==>Create Heroku
 heroku keys:add
-heroku create "add a unique name"
+heroku create "add a unique name" --> heroku create leite-weather-application
 
 
 ==>push Heroku
@@ -31,10 +34,15 @@ git push heroku master
 git status
 git add .
 git commit -m "Add About Text"
+git push --> push changes to github
 
 ==> Other --> to commit heroku
 git push heroku master
 
 ==>Run local server
 npm run start
+npm run dev
+
+==>To install nodemon to run locally. It will not be deployed to heroku
+npm install nodemon --save-dev
 
