@@ -4,12 +4,16 @@ const hbs = require('hbs')
 const geocode = require('./utils/geocode')
 const forecast = require('./utils/forecast')
 const courseApi = require('./utils/courseApi')
+const coursesFilterApi = require('./utils/coursesFilterApi')
+const bodyParser = require('body-parser');
 
 
 // console.log(__dirname)
 // console.log(path.join(__dirname, '../public'))
 
 const app = express()
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 const port = process.env.PORT || 3000
 
 //Define path for Express config
@@ -46,6 +50,16 @@ app.get('/courses', (req, res) => {
     })
 })
 
+app.get('/searchFilters', (req, res) => {
+
+    res.render('searchFilters', {
+        title: 'Show Filter Options',
+        name: 'Elbert Leite'
+    })
+    
+  
+})
+
 app.get('/weather', (req, res) => {
 
     if(!req.query.address){
@@ -75,9 +89,12 @@ app.get('/weather', (req, res) => {
   
 })
 
-app.get('/searchCourses', (req, res) => {
+app.post('/searchCourses', (req, res) => {
 
-    courseApi(undefined, (error, response) => {
+   
+    console.log('==> body3:' + req.body)
+    console.log(req.body.category)
+    courseApi(req.body, (error, response) => {
         if(error){
             return res.send({error: error})
         }
@@ -88,6 +105,8 @@ app.get('/searchCourses', (req, res) => {
     
   
 })
+
+
 
 app.get('/products', (req, res) => {
     if(!req.query.search){
@@ -109,6 +128,18 @@ app.get('/help', (req, res) => {
         helpText: 'This is a help text',
         title: 'Help',
         name: 'Elbert Leite'
+    })
+})
+
+app.get('/helpfilter', (req, res) => {
+    coursesFilterApi(undefined, (error, response) => {
+        if(error){
+            return res.send({error: error})
+        }
+        // console.log('===>response')
+        // console.log(response)
+        res.send(response)
+       
     })
 })
 

@@ -6,6 +6,8 @@
     <title>Help</title>
     <link rel="icon" href="/img/weather.png" >
     <link rel="stylesheet" href="/css/styles.css">
+
+    <script src="https://unpkg.com/vue@next"></script>
 </head>
 
 <body>
@@ -14,9 +16,223 @@
         {{>header}}
 
         <p>{{helpText}}</p>
+
+        <form>
+            <button>Search</button>
+        </form>
+
+        <div class="box">
+            <div class="box-date" onclick="toggle('calendar-container')">12/11/2021</div>
+            <div class="calendar-container" style="display: none;">
+                <div class="box-calendar">
+                    <div class="box-calendar-month">January - 2021</div>
+                    <div class="box-calendar-day-group">
+                        <div data-date="04/01/2021" onclick="displayDate(this)" class="box-calendar-day">04</div>
+                        <div data-date="07/01/2021" onclick="displayDate(this)" class="box-calendar-day">07</div>
+                        <div data-date="14/01/2021" onclick="displayDate(this)" class="box-calendar-day">14</div>
+                    </div>
+                </div>
+                <div class="box-calendar">
+                    <div class="box-calendar-month">February - 2021</div>
+                    <div class="box-calendar-day-group">
+                        <div data-date="04/02/2021" onclick="displayDate(this)" class="box-calendar-day">04</div>
+                        <div data-date="08/02/2021" onclick="displayDate(this)" class="box-calendar-day">08</div>
+                        <div data-date="12/02/2021" onclick="displayDate(this)" class="box-calendar-day">12</div>
+                        <div data-date="16/02/2021" onclick="displayDate(this)" class="box-calendar-day">16</div>
+                        <div data-date="20/02/2021" onclick="displayDate(this)" class="box-calendar-day">20</div>
+                        <div data-date="24/02/2021" onclick="displayDate(this)" class="box-calendar-day">24</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+       
+        <div id="app" class="box-courses-search">
+            {{!--category --}}
+            <ul class="first-level">
+                <li class="field" v-for="item in category">
+                    <label>
+                        <input type="checkbox" :data-parent="item" :key="item" :data-field="'category'" class="parent" onchange="checkItems(this)" />
+                        \{{ item }}
+                    </label>
+                    
+                </li>
+            </ul>
+         
+            {{!--country --}}
+            <div class="box-courses">
+                <form id="searchCountry">
+                    searchCountry <input type="text" v-model="searchCountry">
+                    
+                </form>
+                <ul class="first-level">
+                    <li class="field" v-for="item in filteredCountries">
+                        <label>
+                            <input type="checkbox" :data-parent="item[0]" :key="item[0]" :data-field="'country'" class="parent" onchange="checkItems(this)" />
+                            \{{ item[0] }}
+                        </label>
+                        <ul>
+                            <li class="specializaion" v-for="it in item[1]">
+                                <label>
+                                    <input type="checkbox" :data-parent="item[0]" :key="it" :data-field="'country'" onchange="checkItemParent(this)" :data-child="it"/>
+                                    \{{ it }}
+                                </label>
+                            </li>
+                            
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
+            <form id="search">
+                Search <input type="text" v-model="search">
+                
+            </form>
+            <div class="box-courses">
+
+                {{!--Items --}}
+                <ul class="first-level">
+                    <li class="field" v-for="item in filteredItems">
+                        <label>
+                            <input type="checkbox" :data-parent="item[0]" :key="item[0]" :data-field="'field'" class="parent" onchange="checkItems(this)" />
+                            \{{ item[0] }}
+                        </label>
+                        <ul>
+                            <li class="specializaion" v-for="it in item[1]">
+                                <label>
+                                    <input type="checkbox" :data-parent="item[0]" :key="item[1]" :data-field="'field'" onchange="checkItemParent(this)" :data-child="it"/>
+                                    \{{ it }}
+                                </label>
+                            </li>
+                            
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+           
+            
+
+
+           
+        </div>
+
+
+        <div>
+            <p><span style="color: #999;">Selected Category:</span> <span id="category" /></p>
+            <p><span style="color: #999;">Selected Country:</span> <span id="country" /></p>
+            <p><span style="color: #999;">Selected City:</span> <span id="city" /></p>
+            <p><span style="color: #999;">Selected Field:</span> <span id="field" /></p>
+            <p><span style="color: #999;">Selected Specialization:</span> <span id="specialization" /></p>
+        </div>
     </div>
+
 
     {{>footer}}
 </body>
+
+<style>
+    .highlight {color:red;}
+    .box-courses-search{
+        border: solid 1px #c1c1c1;
+        width: max-content;
+        padding: 5px;
+        margin-top: 15px;
+
+    }
+
+    .box-courses{
+        height: 300px;
+        overflow-y: auto;
+        padding: 10px;
+        width: max-content;
+    }
+    .field{
+        font-weight: bold;
+        color: #777;
+        list-style: none;
+        list-style-position: initial;
+    }
+
+    .specializaion{
+        list-style: none;
+        padding: 2px 0;
+        font-weight: normal;
+    }
+
+    .first-level{
+        padding-left: 0;
+    }
+
+    .box{
+        width: 160px;
+        border: solid 1px #c1c1c1;
+    }
+    .calendar-container{
+        position: absolute;
+        width: 160px;
+        background: rgb(255, 255, 255) none repeat scroll 0% 0%;
+        border: 1px solid rgb(193, 193, 193);
+    }
+
+    .box-date{
+        display: block;
+        border: solid 1px #c1c1c1;
+        padding: 3px;
+        cursor: pointer;
+    }
+    .box-calendar{
+        border: solid 1px rgb(177, 175, 175);
+        border-radius: 3px;
+        margin: 10px 2% 0 2%;
+        width: 95%;
+    }
+    .box-calendar-month{
+        color: #666;
+        padding: 3px;
+        background: #eee;
+    }
+    .box-calendar-day-group{
+        display: flex;
+        flex-wrap: wrap;
+    }
+    .box-calendar-day:hover{
+        background-color: cadetblue;
+        color: #fff;
+        cursor: pointer;
+    }
+
+    .box-calendar-day{
+        padding: 5px 12px;
+        border: solid 1px #c1c1c1;
+        margin: 3px;
+        border-radius: 3px;
+        flex-grow: 1;
+        text-align: center;
+    }
+</style>
+
+
+<script src="/js/courseFilter.js"></script>
+<script>
+
+   
+   
+
+    function toggle(el) {
+        var elem = document.querySelector('.'+el);
+
+        if (elem.style.display === "none") {
+            elem.style.display = "block";
+        } else {
+            elem.style.display = "none";
+        }
+    } 
+
+    function displayDate(dt) {
+        document.querySelector('.box-date').innerHTML = dt.dataset.date;
+        document.querySelector('.calendar-container').style.display = "none";
+    }
+</script>
+
 
 </html>

@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <title>About</title>
+    <link rel="icon" href="/img/weather.png" >
+    <link rel="stylesheet" href="/css/styles.css">
+   
+    
+    
+</head>
+
+<body>
+    <div class="main-content">
+
+        {{>header}}
+        
+       
+        <div id="app" class="box-courses-search">
+            <div class="uk-card uk-card-default uk-card-body">
+                {{!--category --}}
+                <ul class="first-level uk-list">
+                    <li class="field" v-for="item in category">
+                        <label>
+                            <input type="checkbox" :data-parent="item" :key="item" :data-field="'category'" class="parent" onchange="checkItems(this)" />
+                            \{{ item }}
+                        </label>
+                    </li>
+                </ul>
+            </div>
+            <div class="uk-card uk-card-default uk-card-body uk-margin-top">
+                <div class="uk-inline">
+                    <form id="searchCountry" class="uk-search uk-search-default">
+                        <a href="" uk-search-icon></a>
+                        <input class="uk-search-input" type="search" placeholder="Search Country" v-model="searchCountry">
+                    </form>
+                   
+                    <div uk-drop="mode: click">
+                        <div class="uk-card uk-card-body uk-card-default">
+                            {{!-- <button class="uk-drop-close" type="button" uk-close></button> --}}
+                            {{!--country --}}
+                            <ul class="first-level uk-list">
+                                <li class="field" v-for="item in filteredCountries">
+                                    <label>
+                                        <input type="checkbox" :data-parent="item[0]" :key="item[0]" :data-field="'country'" class="parent" onchange="checkItems(this)" />
+                                        \{{ item[0] }}
+                                    </label>
+                                    <ul class="uk-list uk-margin-left">
+                                        <li class="specializaion" v-for="it in item[1]">
+                                            <label>
+                                                <input type="checkbox" :data-parent="item[0]" :key="it" :data-field="'country'" onchange="checkItemParent(this)" :data-child="it"/>
+                                                \{{ it }}
+                                            </label>
+                                        </li>
+                                        
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="uk-card uk-card-default uk-card-body uk-margin-top">
+                <div class="uk-inline">
+
+                    <form id="search" class="uk-search uk-search-default">
+                        <a href="" uk-search-icon></a>
+                        <input class="uk-search-input" type="search" placeholder="Search Field" v-model="search">
+                    </form>
+                    <div uk-drop="mode: click">
+                            <div class="uk-card uk-card-body uk-card-default">
+                                {{!-- <button class="uk-drop-close uk-sticky" type="button" uk-close></button> --}}
+                                {{!--Items --}}
+                                <ul class="first-level uk-list">
+                                    <li class="field" v-for="item in filteredItems">
+                                        <label class="uk-tile uk-tile-muted uk-padding-remove uk-text-bold">
+                                            <input type="checkbox" :data-parent="item[0]" :key="item[0]" :data-field="'field'" class="parent" onchange="checkItems(this)" />
+                                            \{{ item[0] }}
+                                        </label>
+                                        <ul class="uk-list uk-margin-left">
+                                            <li class="specializaion" v-for="it in item[1]">
+                                                <label>
+                                                    <input type="checkbox" :data-parent="item[0]" :key="item[1]" :data-field="'field'" onchange="checkItemParent(this)" :data-child="it"/>
+                                                    \{{ it }}
+                                                </label>
+                                            </li>
+                                            
+                                        </ul>
+                                    </li>
+                                </ul>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+                   
+        </div>
+
+        <div class="uk-card uk-card-default uk-card-body uk-margin-top">
+            <p><span style="color: #999;">Selected Category:</span> <span id="category" /></p>
+            <p><span style="color: #999;">Selected Country:</span> <span id="country" /></p>
+            <p><span style="color: #999;">Selected City:</span> <span id="city" /></p>
+            <p><span style="color: #999;">Selected Field:</span> <span id="field" /></p>
+            <p><span style="color: #999;">Selected Specialization:</span> <span id="specialization" /></p>
+        </div>
+    </div>
+	
+        
+        {{>footer}}
+    </div>
+</body>
+
+<style>
+    .uk-card {
+        max-height: 250px;
+        overflow-y: auto;
+    }
+
+    [class*=uk-drop-bottom] {
+        margin-top: 0px;
+    }
+
+    .uk-card-body {
+        padding: 3px;
+        font-size: 0.8em;
+    }
+
+    .uk-drop {
+        position: fixed;
+    }
+</style>
+
+<script>
+const searchFilters = () => {
+    fetch('/helpfilter').then((response) => {
+        response.json().then((data) => {
+            if(data.error){
+                console.log(data.error)
+            }else{
+                objFilter = data.category_city_field_specialization //JSON File
+                console.log(objFilter)
+                filterCategories()
+            }
+        })
+    })
+}
+
+const filterCategories = () => {
+    for(const category in objFilter){
+        categories.push(category)
+    }
+    filter.$forceUpdate();
+}
+
+const filterCountryCity = () => {
+    countries.clear()
+    for(const category in objFilter){
+        if(selectedCategories.includes(category)){
+            for(const country in objFilter[category]){
+                countries.set(country, [])
+                for(const city in objFilter[category][country]){
+                    countries.set(country, [city, ...countries.get(country)])
+                }
+            }
+        }
+    }
+    filterFieldSpecialization()
+    filter.$forceUpdate();
+}
+
+const filterFieldSpecialization = () => {
+    coursesField.clear()
+    console.log(filterCity)
+    for(const category in objFilter){
+        if(selectedCategories.includes(category)){
+            for(const country in objFilter[category]){
+                for(const city in objFilter[category][country]){
+                    if((selectedCountries.indexOf(country) != -1 && filterCity.length == 0) || (selectedCountries.indexOf(country) != -1 && filterCity.indexOf(city) != -1) || selectedCities.indexOf(city) != -1){
+                        for(const field in objFilter[category][country][city]) {
+                            if(!coursesField.has(field))
+                                coursesField.set(field, [])
+                            objFilter[category][country][city][field].forEach((specialization) => {
+                                if(!coursesField.get(field).includes(specialization))
+                                    coursesField.set(field, [specialization, ...coursesField.get(field)])
+                            }) 
+                        }
+                    }
+                }
+            }
+        }
+    }
+    console.log(coursesField)
+    filter.$forceUpdate();
+}
+
+let coursesField = new Map()
+let countries = new Map()
+let categories = []
+let selectedCategories = []
+let selectedCountries = []
+let selectedCities = []
+let selectedFields = []
+let selectedSpecializations = []
+let filterCity = []
+let objFilter = {
+    category: [{
+        country: [{
+            city: [{
+                field: [{
+                    specialization: []
+                }]
+            }
+                
+            ]}
+        ]
+    }]
+}
+
+    const filter = Vue.createApp({
+        data() {
+            return{
+                search: '',
+                searchCountry: '',
+                category: categories,
+                country: countries,
+                items: coursesField
+            }
+        },
+        computed: {
+            filteredItems()  {
+                console.log(this.search)
+                
+                if(this.search.trim() === '') 
+                    return this.items
+                else {
+                    let fieldsSpec = new Map()
+                    for (const [key, value] of this.items.entries()) {
+                        value.forEach(it => {
+                            if(it.toLowerCase().includes(this.search.trim()))
+                                fieldsSpec.set(key, value) 
+                        })
+                        if(key.toLowerCase().includes(this.search.trim())){
+                            fieldsSpec.set(key, value) 
+                        }
+                    }
+                    return fieldsSpec
+                }
+                
+            },
+            filteredCountries()  {
+                console.log(this.searchCountry)
+                
+                if(this.searchCountry.trim() === ''){
+                    filterCity = []
+                    return this.country
+                } 
+                else {
+                    let countryCity = new Map()
+                    filterCity = []
+                    for (const [key, value] of this.country.entries()) {
+                        value.forEach(city => {
+                            if(city.toLowerCase().includes(this.searchCountry.trim()) ){
+                                console.log(city)
+                                if(countryCity.has(key))
+                                    countryCity.set(key, [city, ...countryCity.get(key)]) 
+                                else countryCity.set(key, [city])
+                                filterCity.push(city)
+                            }
+                        })
+                        if(key.toLowerCase().includes(this.searchCountry.trim())){
+                            countryCity.set(key, value) 
+                        }
+                    }
+                    console.log(filterCity)
+                    return countryCity
+                }
+                
+            }
+        },
+        beforeMount() {
+          this.gevalues()
+        },
+        methods: {
+          async gevalues(){
+            await searchFilters()
+            
+          }, 
+          findField(){
+            filterFieldSpecialization()
+          },
+          findCountries(){
+              filterCountryCity()
+          }
+        }
+
+    }).mount("#app")
+
+
+    let parent = [];
+    let child = [];
+
+    function checkItems(item){
+        document.querySelectorAll("input[data-parent='"+item.dataset.parent+"']").forEach(function(el){
+            el.checked = item.checked;
+        });
+        allSelected(item);
+    }
+
+    function checkItemParent(item){
+        document.querySelector("input[data-parent='"+item.dataset.parent+"'].parent").checked = false;
+        allSelected(item);
+    }
+
+    function allSelected(item){
+        parent = [];
+        child = [];
+        console.log(item)
+        document.querySelectorAll("input[data-field='"+item.dataset.field+"']").forEach(function(el){
+            if(el.checked && el.dataset.parent && el.dataset.child === undefined){
+                parent.push(el.dataset.parent);
+            }
+            if(el.checked && el.dataset.child && !parent.includes(el.dataset.parent)){
+                child.push(el.dataset.child);
+            }
+        });
+        console.log(parent);
+        console.log(child);
+        if(item.dataset.field == 'category'){
+            document.querySelector("#category").innerHTML = parent;
+            selectedCategories = parent;
+            filter.findCountries();
+        }
+        if(item.dataset.field == 'country'){
+            document.querySelector("#country").innerHTML = parent;
+            document.querySelector("#city").innerHTML = child;
+            selectedCountries = parent;
+            selectedCities = child;
+            filter.findField();
+        }
+        if(item.dataset.field == 'field'){
+            document.querySelector("#field").innerHTML = parent;
+            document.querySelector("#specialization").innerHTML = child;
+            selectedFields = parent;
+            selectedSpecializations = child;
+        }
+                
+    }
+     
+</script>
+</html>

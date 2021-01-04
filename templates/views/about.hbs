@@ -6,6 +6,7 @@
     <title>About</title>
     <link rel="icon" href="/img/weather.png" >
     <link rel="stylesheet" href="/css/styles.css">
+    <script src="https://unpkg.com/vue@next"></script>
 </head>
 
 <body>
@@ -14,9 +15,34 @@
         {{>header}}
         <p>This site was created by me</p>
         <img class="logo" src="/img/iplogo.jpg">
+
+         <div id="app">
+            <ul id="example-1">
+                <li v-for="item in items" :data-test="item.message" :key="item.message">
+                    \{{ item.message }}
+                </li>
+            </ul>
+        </div>
     </div>
     
     {{>footer}}
 </body>
 
+<script>
+
+     const mapfields = {
+        data() {
+            return{
+                items: [
+                    { message: 'Foo' },
+                    { message: 'Fuba' },
+                    { message: 'Ze' },
+                    { message: 'Bar' }
+                    ]
+            }
+        }
+    }
+
+    Vue.createApp(mapfields).mount("#app")
+</script>
 </html>

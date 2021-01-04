@@ -1,0 +1,424 @@
+
+        
+       
+        <div id="app" class="box-courses-search">
+            <div class="uk-card uk-card-default uk-card-body">
+                {{!--category --}}
+                <ul class="first-level uk-list">
+                    <li class="field" v-for="item in categories">
+                        <label>
+                            <input type="checkbox" :data-parent="item" :key="item" :data-field="'category'" class="parent" onchange="checkItems(this); " />
+                            \{{ item }}
+                        </label>
+                    </li>
+                </ul>
+            </div>
+            <div class="uk-card uk-card-default uk-card-body uk-margin-top">
+                <table uk-grid  id="searchCountry">
+                    <tr>
+                        <td>
+                            <a href="" uk-icon="icon: location"> </a> 
+                            <span class="uk-badge uk-margin-small-left"> \{{ selCountries.length + selCities.length }}</span>
+                        </td>
+                        <td>
+                            <input class="uk-search-input" type="search" placeholder="Search Country" v-model="searchCountry">
+                        </td>
+                    </tr>
+
+                </table>
+                <div uk-drop="mode: click;  boundary: .boundary-align; boundary-align: true">
+                    <div class="uk-card uk-card-body uk-card-default">
+                        {{!-- <button class="uk-drop-close" type="button" uk-close></button> --}}
+                        {{!--country --}}
+                        <ul class="first-level uk-list">
+                            <template v-for="country in filteredCountries">
+                                <li class="field" v-show="countriesKeyFilter.get(country[0])">
+                                    <label class="uk-label uk-width-1-1">
+                                        <input type="checkbox" :data-parent="country[0]" :key="country[0]" :data-field="'country'" class="parent" onchange="checkItems(this);" />
+                                        \{{ country[0] }}  
+                                    </label>
+                                    <ul class="uk-list uk-margin-left">
+                                        <template v-for="it in country[1]">
+                                            <li class="specializaion" v-show="it.show">
+                                                <label >
+                                                    <input type="checkbox" :data-parent="country[0]" :key="it" :data-field="'country'" onchange="checkItemParent(this);" :data-child="it.valueSearch"/>
+                                                    <span v-html="it.value"></span>
+                                                </label>
+                                            </li>
+                                        </template>
+                                        
+                                    </ul>
+                                </li>
+                            </template>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+            <div class="uk-card uk-card-default uk-card-body uk-margin-top">
+                 <table uk-grid  id="search">
+                    <tr>
+                        <td>
+                            <a href="" uk-icon="icon: list"></a>
+                            <span class="uk-badge uk-margin-small-left"> \{{ selFields.length + selSpecializations.length }}</span>
+                        </td>
+                        <td>
+                            <input class="uk-search-input" type="search" placeholder="Search Field" v-model="search">
+                        </td>
+                    </tr>
+                </table>
+                <div uk-drop="mode: click; boundary: .boundary-align; boundary-align: true">
+                        <div class="uk-card uk-card-body uk-card-default">
+                            {{!-- <button class="uk-drop-close uk-sticky" type="button" uk-close></button> --}}
+                            {{!--Items --}}
+                            <ul class="first-level uk-list">
+                                <template v-for="courseField in filteredItems">
+                                    
+                                    <li class="field" v-show="coursesFieldKeyFilter.get(courseField[0])">
+                                        <label class="uk-label uk-width-1-1 uk-text-break uk-text-small">
+                                            <input type="checkbox" :data-parent="courseField[0]" :key="courseField[0]" :data-field="'field'" class="parent" onchange="checkItems(this)" />
+                                            \{{ courseField[0] }}
+                                        </label>
+                                        <ul class="uk-list uk-margin-left">
+                                            <template v-for="it in courseField[1]">
+                                                <li class="specializaion" v-show="it.show">
+                                                    <label>
+                                                        <input type="checkbox" :data-parent="courseField[0]" :key="courseField[1]" :data-field="'field'" onchange="checkItemParent(this)" :data-child="it.valueSearch"/>
+                                                        <span v-html="it.value"></span>
+                                                    </label>
+                                                </li>
+                                            </template>
+                                            
+                                        </ul>
+                                    </li>
+                                </template>
+                            </ul>
+                    </div>
+                </div>
+
+            </div>
+                   
+                    
+            <p><span style="color: #999;">Selected Category:</span> \{{ selCategory }} </p>
+            <p><span style="color: #999;">Selected Country:</span> \{{ selCountries }} </p>
+            <p><span style="color: #999;">Selected City:</span> \{{ selCities }} </p>
+            <p><span style="color: #999;">Selected Field:</span> \{{ selFields }} </p>
+            <p><span style="color: #999;">Selected Specialization:</span> \{{ selSpecializations }} </p>
+        </div>
+
+     
+<style>
+    .uk-card {
+        max-height: 250px;
+        overflow-y: auto;
+    }
+
+    [class*=uk-drop-bottom] {
+        margin-top: 0px;
+    }
+
+    .uk-card-body {
+        padding: 3px;
+        font-size: 0.8em;
+    }
+
+    .uk-drop {
+        position: fixed;
+    }
+    .highlight {
+        background-color: yellow;
+        font-weight: bold;
+    }
+</style>
+
+<script>
+    const searchFilters = () => {
+        fetch('/helpfilter').then((response) => {
+            response.json().then((data) => {
+                if(data.error){
+                    console.log(data.error)
+                }else{
+                    filter.objFilter = data.category_city_field_specialization //JSON File
+                    console.log(filter.objFilter)
+                    filter.filterCategories()
+                }
+            })
+        })
+    }
+
+    
+    const filter = Vue.createApp({
+        data() {
+            return{
+                coursesField: new Map(),
+                coursesFieldKeyFilter: new Map(),
+                countries: new Map(),
+                countriesKeyFilter: new Map(),
+                categories: [],
+                filterCity: [],
+                objFilter: {
+                    category: [{
+                        country: [{
+                            city: [{
+                                field: [{
+                                    specialization: []
+                                }]
+                            }
+                                
+                            ]}
+                        ]
+                    }]
+                },
+                search: '',
+                searchCountry: '',
+                selCategory: [],
+                selCountries: [],
+                selCities: [],
+                selFields: [],
+                selSpecializations: []
+            }
+        },
+        computed: {
+            filteredItems()  {
+                for (const [key, value] of this.coursesField.entries()) {
+                    this.coursesFieldKeyFilter.set(key, false)
+                    value.forEach(field => {
+                        if(this.search.trim() === '')
+                            field.show = true
+                        else field.show = false
+                        if(field.valueSearch.toLowerCase().includes(this.search.trim())){
+                            field.show = true
+                            let iQuery = new RegExp(this.search, "ig");
+                            field.value = field.valueSearch.toString().replace(iQuery, function(matchedTxt,a,b){
+                                return ('<span class=\'highlight\'>' + matchedTxt + '</span>');
+                            });
+                            this.coursesFieldKeyFilter.set(key, true)
+                        }
+                    })
+                    if(key.toLowerCase().includes(this.search.trim())){
+                        this.coursesFieldKeyFilter.set(key, true)
+                    }
+                }
+                return this.coursesField
+                
+            },
+            filteredCountries()  {
+                    this.filterCity = []
+                    for (const [key, value] of this.countries.entries()) {
+                        this.countriesKeyFilter.set(key, false)
+                        value.forEach(city => {
+                            if(this.searchCountry.trim() === '')
+                                city.show = true
+                            else city.show = false
+                            if(city.valueSearch.toLowerCase().includes(this.searchCountry.trim()) ){
+                                city.show = true
+                                let iQuery = new RegExp(this.searchCountry, "ig");
+                                city.value = city.valueSearch.toString().replace(iQuery, function(matchedTxt,a,b){
+                                    return ('<span class=\'highlight\'>' + matchedTxt + '</span>');
+                                });
+                                console.log(city.value)
+                                this.countriesKeyFilter.set(key, true)
+                                this.filterCity.push(city)
+                            }
+                        })
+                        if(key.toLowerCase().includes(this.searchCountry.trim())){
+                           this.countriesKeyFilter.set(key, true)
+                           value.forEach(city => { //return all items from map key position
+                                city.show = true
+                                city.value = city.valueSearch
+                           })
+                        }
+                    }
+                    return this.countries
+                //}
+                
+            }
+        },
+        beforeMount() {
+            this.gevalues()
+        },
+        watch: {
+            countries:  {
+                deep: true,
+                handler(){
+                    console.log('value changed country ' );
+                    this.$nextTick(() => {
+                        clearSelectedCountries()
+                    });
+                }
+            },
+            coursesField:  {
+                deep: true,
+                handler(){
+                    console.log('value changed field ' );
+                    this.$nextTick(() => {
+                        clearSelectedFields()
+                    });
+                }
+            }
+        },
+        methods: {
+            async gevalues(){
+                await searchFilters()
+                
+            }, 
+            filterCountryCity() {
+                this.countries.clear()
+                this.countriesKeyFilter.clear()
+                for(const category in this.objFilter){
+                    if(this.selCategory.includes(category)){
+                        for(const country in this.objFilter[category]){
+                            this.countries.set(country, [])
+                            this.countriesKeyFilter.set(country, true)
+                            for(const city in this.objFilter[category][country]){
+                                this.countries.set(country, [{value: city, valueSearch: city, show: true}, ...this.countries.get(country)])
+                            }
+                        }
+                    }
+                }
+                
+                this.filterFieldSpecialization()
+            },
+            filterCategories() {
+                for(const category in filter.objFilter){
+                    this.categories.push(category)
+                }
+            },
+            filterFieldSpecialization() {
+                this.coursesField.clear()
+                this.coursesFieldKeyFilter.clear()
+                console.log(this.filterCity)
+                for(const category in this.objFilter){
+                    if(this.selCategory.includes(category)){
+                        for(const country in this.objFilter[category]){
+                            for(const city in this.objFilter[category][country]){
+                                if(this.selCountries.length > 0 || this.selCities.length > 0){
+                                    if((this.selCountries.indexOf(country) != -1 && this.filterCity.length == 0) || (this.selCountries.indexOf(country) != -1 && this.filterCity.indexOf(city) != -1) || this.selCities.indexOf(city) != -1){
+                                        for(const field in this.objFilter[category][country][city]) {
+                                            if(!this.coursesField.has(field)){
+                                                this.coursesField.set(field, [])
+                                                this.coursesFieldKeyFilter.set(field, true)
+                                            }
+                                            this.objFilter[category][country][city][field].forEach((specialization) => {
+                                                if(this.coursesField.get(field).find(({ valueSearch }) => valueSearch === specialization) === undefined)
+                                                    this.coursesField.set(field, [{value: specialization, valueSearch: specialization, show: true}, ...this.coursesField.get(field)])
+                                            }) 
+                                        }
+                                    }
+                                }else{
+                                    for(const field in this.objFilter[category][country][city]) {
+                                        if(!this.coursesField.has(field)){
+                                            this.coursesField.set(field, [])
+                                            this.coursesFieldKeyFilter.set(field, true)
+                                        }
+                                        this.objFilter[category][country][city][field].forEach((specialization) => {
+                                            if(this.coursesField.get(field).find(({ valueSearch }) => valueSearch === specialization) === undefined)
+                                                this.coursesField.set(field, [{value: specialization, valueSearch: specialization, show: true}, ...this.coursesField.get(field)])
+                                        }) 
+                                    }
+
+                                }
+                            
+                            }
+                        }
+                    }
+                }
+                console.log(this.coursesField)
+            }
+        }
+
+    }).mount("#app")
+
+
+    let parent = [];
+    let child = [];
+
+    function clearSelectedCountries(){
+        let filterCountries = [];
+        let filterCities = [];
+        document.querySelectorAll("input[data-field='country']").forEach( el => {
+            if(filter.selCountries.includes(el.dataset.parent) && el.dataset.child === undefined){
+                el.checked = true;
+                filterCountries.push(el.dataset.parent);
+                checkAll(el)
+            }else if(filter.selCities.includes(el.dataset.child)){
+                el.checked = true;
+                filterCities.push(el.dataset.child);
+            }
+        });
+        filter.selCountries.clear;
+        filter.selCountries = [...filterCountries];
+        filter.selCities.clear;
+        filter.selCities = [...filterCities];
+    }
+
+    function clearSelectedFields(){
+        let filterFields = [];
+        let filterSpecialization = [];
+
+        document.querySelectorAll("input[data-field='field']").forEach( el => {
+             if(filter.selFields.includes(el.dataset.parent) && el.dataset.child === undefined){
+                el.checked = true;
+                filterFields.push(el.dataset.parent);
+                checkAll(el)
+            }else if(filter.selSpecializations.includes(el.dataset.child)){
+                el.checked = true;
+                filterSpecialization.push(el.dataset.child);
+            }
+        });
+        filter.selFields.clear;
+        filter.selFields = [...filterFields];
+        filter.selSpecializations.clear;
+        filter.selSpecializations = [...filterSpecialization];
+    }
+
+    function checkAll(item){
+        document.querySelectorAll("input[data-parent='"+item.dataset.parent+"']").forEach( el => {
+            el.checked = item.checked;
+        });
+    }
+
+    function checkItems(item){
+        document.querySelectorAll("input[data-parent='"+item.dataset.parent+"']").forEach( el => {
+            el.checked = item.checked;
+        });
+        allSelected(item);
+    }
+
+    function checkItemParent(item){
+        document.querySelector("input[data-parent='"+item.dataset.parent+"'].parent").checked = false;
+        allSelected(item);
+    }
+
+    function allSelected(item){
+        parent = [];
+        child = [];
+        console.log(item)
+        document.querySelectorAll("input[data-field='"+item.dataset.field+"']").forEach( el => {
+            if(el.checked && el.dataset.parent && el.dataset.child === undefined){
+                parent.push(el.dataset.parent);
+            }
+            if(el.checked && el.dataset.child && !parent.includes(el.dataset.parent)){
+                child.push(el.dataset.child);
+            }
+        });
+        console.log(parent);
+        console.log(child);
+        if(item.dataset.field == 'category'){
+            filter.selCategory = parent;
+            console.log('==> '+filter.selCategory)
+            filter.filterCountryCity();
+        }
+        if(item.dataset.field == 'country'){
+            filter.selCountries = parent;
+            filter.selCities = child;
+            filter.filterFieldSpecialization();
+        }
+        if(item.dataset.field == 'field'){
+            filter.selFields = parent;
+            filter.selSpecializations = child;
+        }
+
+    }
+     
+</script>
