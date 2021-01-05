@@ -197,6 +197,15 @@
                     })
                     if(key.toLowerCase().includes(this.search.trim())){
                         this.coursesFieldKeyFilter.set(key, true)
+                        this.countriesKeyFilter.set(key, true)
+                        value.forEach(field => { //return all items from map key position
+                            field.show = true
+                            field.value = field.valueSearch
+                            let iQuery = new RegExp(this.search, "ig");
+                            field.value = field.valueSearch.toString().replace(iQuery, function(matchedTxt,a,b){
+                                return ('<span class=\'highlight\'>' + matchedTxt + '</span>');
+                            });
+                        })
                     }
                 }
                 return this.coursesField
@@ -218,7 +227,7 @@
                                 });
                                 console.log(city.value)
                                 this.countriesKeyFilter.set(key, true)
-                                this.filterCity.push(city)
+                                //this.filterCity.push(city)
                             }
                         })
                         if(key.toLowerCase().includes(this.searchCountry.trim())){
@@ -226,6 +235,10 @@
                            value.forEach(city => { //return all items from map key position
                                 city.show = true
                                 city.value = city.valueSearch
+                                let iQuery = new RegExp(this.searchCountry, "ig");
+                                city.value = city.valueSearch.toString().replace(iQuery, function(matchedTxt,a,b){
+                                    return ('<span class=\'highlight\'>' + matchedTxt + '</span>');
+                                });
                            })
                         }
                     }
@@ -287,13 +300,18 @@
             filterFieldSpecialization() {
                 this.coursesField.clear()
                 this.coursesFieldKeyFilter.clear()
-                console.log(this.filterCity)
+                //console.log(this.filterCity)
+               // console.log(this.selCountries)
+                //console.log(this.objFilter)
+                //console.log('**************************')
                 for(const category in this.objFilter){
                     if(this.selCategory.includes(category)){
                         for(const country in this.objFilter[category]){
                             for(const city in this.objFilter[category][country]){
                                 if(this.selCountries.length > 0 || this.selCities.length > 0){
-                                    if((this.selCountries.indexOf(country) != -1 && this.filterCity.length == 0) || (this.selCountries.indexOf(country) != -1 && this.filterCity.indexOf(city) != -1) || this.selCities.indexOf(city) != -1){
+                                    //if((this.selCountries.indexOf(country) != -1 && this.filterCity.length == 0) || (this.selCountries.indexOf(country) != -1 && this.filterCity.indexOf(city) != -1) || this.selCities.indexOf(city) != -1){
+                                    if((this.selCountries.indexOf(country) != -1) || this.selCities.indexOf(city) != -1){
+                                        console.log(this.objFilter[category][country][city])
                                         for(const field in this.objFilter[category][country][city]) {
                                             if(!this.coursesField.has(field)){
                                                 this.coursesField.set(field, [])
@@ -336,6 +354,7 @@
     function clearSelectedCountries(){
         let filterCountries = [];
         let filterCities = [];
+        console.log('====>clearSelectedCountries')
         document.querySelectorAll("input[data-field='country']").forEach( el => {
             if(filter.selCountries.includes(el.dataset.parent) && el.dataset.child === undefined){
                 el.checked = true;
